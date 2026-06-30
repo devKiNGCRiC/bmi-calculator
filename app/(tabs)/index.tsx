@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { View , Text , StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import BarGauge from '../../components/BarGuage';
 
 type BMIResult = {
   value: number;
@@ -114,6 +115,9 @@ export default function HomeScreen(){
           <Text style={[styles.resultCategory, { color: bmiResult.color }]}>
             {bmiResult.category}
           </Text>
+
+          {/* BarGauge */}
+          <BarGauge bmi={bmiResult.value} />
         </View>
       )}
     </View>
