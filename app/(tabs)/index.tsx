@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View , Text , StyleSheet, Touchable, TouchableOpacity } from 'react-native'
+import { View , Text , StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 
 export default function HomeScreen(){
   const [unit, setUnit] = useState('metric');
@@ -30,6 +30,29 @@ export default function HomeScreen(){
         </TouchableOpacity>
       </View>
       {/* Height Input */}
+      <Text style={styles.label}>Height ({unit === 'metric' ? 'cm' : 'inches'})</Text>
+      <TextInput
+        style={styles.input}
+        placeholder={unit === 'metric' ? 'e.g. 170' : 'e.g. 67'}
+        placeholderTextColor= "#666"
+        keyboardType='numeric'
+        value={height}
+        onChangeText={setHeight}
+      />
+      {/* Weight Input */}
+      <Text style={styles.label}>Weight ({unit === 'metric' ? 'kg' : 'lbs'})</Text>
+      <TextInput
+        style={styles.input}
+        placeholder={unit === 'metric' ? 'e.g. 65' : 'e.g. 142'}
+        placeholderTextColor= "#666"
+        keyboardType='numeric'
+        value={weight}
+        onChangeText={setWeight}
+      />
+      {/* Calculate Button */}
+      <TouchableOpacity style={styles.calculateButton} onPress={() => console.log('Calculate pressed')}>
+        <Text style={styles.calculateButtonText}>Calculate BMI</Text>
+      </TouchableOpacity>
     </View>
   );
 }
