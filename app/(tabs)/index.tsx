@@ -3,6 +3,7 @@ import { View , Text , StyleSheet, TextInput, TouchableOpacity , ScrollView } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarGauge from '../../components/BarGauge';
 import CurveGauge from '../../components/CurveGauge';
+import HealthTips from '../../components/HealthTips';
 
 type BMIResult = {
   value: number;
@@ -219,6 +220,11 @@ export default function HomeScreen(){
               </Text>
             </TouchableOpacity>
           </View> 
+          {/* Health Tips — add this */}
+          <HealthTips
+            category={bmiResult.category}
+            color={bmiResult.color}
+          />
         </View>
       )}
 
