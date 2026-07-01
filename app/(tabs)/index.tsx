@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState , useEffect } from 'react';
 import { View , Text , StyleSheet, TextInput, TouchableOpacity , ScrollView } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarGauge from '../../components/BarGauge';
 import CurveGauge from '../../components/CurveGauge';
 
@@ -9,12 +10,60 @@ type BMIResult = {
   color: string;
 }
 
+type HistoryEntry = {
+  id: string,
+  bmi: number,
+  category: string,
+  color: string,
+  unit: string,
+  date: string, // human-readable date string
+}
+
 export default function HomeScreen(){
   const [unit, setUnit] = useState('metric');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bmiResult, setBmiResult] = useState<BMIResult | null>(null); // null = no result yet
   const [gaugeType,  setGaugeType] = useState<'bar' | 'curve'>('curve');
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  const STORAGE_KEY = 'bmi_history';
+
+  //Load history from device when app opens
+
+  useEffect(() =>{
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    try{
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if(stored){
+        setHistory(JSON.parse(stored))
+      }
+    }catch(error){
+      console.log('Failed to load history:', error)
+    }
+  }
+
+  const saveToHistory = async (entry: HistoryEntry) => {
+    try {
+      const updated = [entry, ...history]; //new entry goes to the top
+      setHistory(updated);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    }catch(error){
+      console.log('Failed to Save History: ', error);
+    }
+  }
+
+  const clearHistory = async () => {
+    try{
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      setHistory([]);
+    }catch(error){
+      console.log('Failed to clear history:', error);
+    }
+  }
 
   const calculateBMI = () => {
     //Convert input strings to numbers
@@ -38,11 +87,32 @@ export default function HomeScreen(){
 
     bmi = parseFloat(bmi.toFixed(1)); //round to 1 decimal place
 
-    setBmiResult({
+    const result = ({
       value: bmi,
       category: getCategory(bmi),
       color: getColor(bmi),
     });
+
+    setBmiResult(result);
+
+    //Save to history
+    const entry: HistoryEntry ={
+      id: Date.now().toString(), //unique ID using timestamp
+      bmi: result.value,
+      category: result.category,
+      color: result.color,
+      unit: unit,
+      date: new Date().toLocaleDateString('en-IN' , {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }), 
+    };
+
+    saveToHistory(entry);
+
   };
 
   const getCategory = (bmi: number) => {
@@ -151,6 +221,50 @@ export default function HomeScreen(){
           </View> 
         </View>
       )}
+
+      {/* History Section */}
+      {history.length > 0 && (
+        <View style={styles.historyContainer}>
+
+          {/* Header row */}
+          <View style={styles.historyHeader}>
+            <Text style={styles.historyTitle}>History</Text>
+            <TouchableOpacity onPress={clearHistory}>
+              <Text style={styles.clearButton}>Clear All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/*History entries */}
+          {history.map((entry) => (
+            <View key={entry.id} style={styles.historyCard}>
+
+              {/* Left side - BMI value + category */}
+              <View style={styles.historyLeft}>
+                <Text style={[styles.historyBmi, {color: entry.color}]}>
+                  {entry.bmi}
+                </Text>
+                <Text style={[styles.historyCategory, { color: entry.color}]}>
+                  {entry.category}
+                </Text>
+              </View>
+
+              {/* Right side - unit + date  */}
+              <View style={styles.historyRight}>
+                <Text style={styles.historyUnit}>
+                  {entry.unit === 'metric' ? 'kg/cm' : 'lbs/in'}
+                </Text>
+                <Text style={styles.historyDate}>
+                  {entry.date}
+                </Text>
+              </View>
+
+              {/* Left color accent bar */}
+              <View style={[styles.historyAccent, { backgroundColor: entry.color}]}/>
+            </View>
+          ))}
+        </View>
+      )}
+
     </ScrollView>
   );
 }
@@ -267,5 +381,66 @@ const styles = StyleSheet.create({
   },
   gaugeToggleTextActive: {
     color: '#ffffff'
-  }
+  },
+  historyContainer: {
+  marginTop: 40,
+},
+historyHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 16,
+},
+historyTitle: {
+  color: '#ffffff',
+  fontSize: 20,
+  fontWeight: 'bold',
+},
+clearButton: {
+  color: '#ef4444',
+  fontSize: 14,
+  fontWeight: '600',
+},
+historyCard: {
+  backgroundColor: '#1a1a1a',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 10,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  overflow: 'hidden',
+  position: 'relative',
+},
+historyLeft: {
+  flex: 1,
+},
+historyBmi: {
+  fontSize: 24,
+  fontWeight: 'bold',
+},
+historyCategory: {
+  fontSize: 13,
+  fontWeight: '600',
+  marginTop: 2,
+},
+historyRight: {
+  alignItems: 'flex-end',
+},
+historyUnit: {
+  color: '#666',
+  fontSize: 12,
+},
+historyDate: {
+  color: '#555',
+  fontSize: 12,
+  marginTop: 4,
+},
+historyAccent: {
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  bottom: 0,
+  width: 4,
+},
 });
