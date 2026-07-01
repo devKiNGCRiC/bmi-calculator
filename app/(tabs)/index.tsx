@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View , Text , StyleSheet, TextInput, TouchableOpacity } from 'react-native'
-import BarGauge from '../../components/BarGuage';
+import BarGauge from '../../components/BarGauge';
+import CurveGauge from '../../components/CurveGauge';
 
 type BMIResult = {
   value: number;
@@ -118,6 +119,8 @@ export default function HomeScreen(){
 
           {/* BarGauge */}
           <BarGauge bmi={bmiResult.value} />
+          {/* CurveGauge */}
+          <CurveGauge bmi={bmiResult.value} />
         </View>
       )}
     </View>

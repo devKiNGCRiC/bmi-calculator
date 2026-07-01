@@ -1,10 +1,10 @@
 import { View, Text,  StyleSheet } from 'react-native'
 
-type BarGuageProps ={ 
+type BarGaugeProps ={ 
     bmi: number;
 };
 
-export default function BarGauge({ bmi }: BarGuageProps){
+export default function BarGauge({ bmi }: BarGaugeProps){
     //Define our display range
     const MIN_BMI = 15;
     const MAX_BMI = 40;
