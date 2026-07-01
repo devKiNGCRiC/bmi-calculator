@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View , Text , StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View , Text , StyleSheet, TextInput, TouchableOpacity , ScrollView } from 'react-native'
 import BarGauge from '../../components/BarGauge';
 import CurveGauge from '../../components/CurveGauge';
 
@@ -14,6 +14,7 @@ export default function HomeScreen(){
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bmiResult, setBmiResult] = useState<BMIResult | null>(null); // null = no result yet
+  const [gaugeType,  setGaugeType] = useState<'bar' | 'curve'>('curve');
 
   const calculateBMI = () => {
     //Convert input strings to numbers
@@ -59,7 +60,11 @@ export default function HomeScreen(){
   }
 
   return(
-    <View style={styles.container}>
+    <ScrollView 
+      style={styles.scrollView}
+      contentContainerStyle = {styles.container}
+      keyboardShouldPersistTaps = "handled"
+    >
       <Text style={styles.title}>BMI Calculator</Text>
 
       {/* Unit Toggle */}
@@ -117,22 +122,48 @@ export default function HomeScreen(){
             {bmiResult.category}
           </Text>
 
-          {/* BarGauge */}
-          <BarGauge bmi={bmiResult.value} />
-          {/* CurveGauge */}
-          <CurveGauge bmi={bmiResult.value} />
+          
+          {/* Gauge Display */}
+          {gaugeType === 'curve' 
+            ? <CurveGauge bmi={bmiResult.value} />
+            : <BarGauge bmi={bmiResult.value} />
+          }
+
+          {/* Gauge Toggle */}
+          <View style={styles.gaugeToggleContainer}>
+            <TouchableOpacity
+              style={[styles.gaugeToggleButton, gaugeType === 'curve' && styles.gaugeToggleActive]}
+              onPress={() => setGaugeType('curve')}
+            >
+              <Text style={[styles.gaugeToggleText, gaugeType === 'curve' && styles.gaugeToggleTextActive]}>
+                Arc
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.gaugeToggleButton, gaugeType === 'bar' && styles.gaugeToggleActive]}
+              onPress={() => setGaugeType('bar')}
+            >
+              <Text style={[styles.gaugeToggleText, gaugeType === 'bar' && styles.gaugeToggleTextActive]}>
+                Bar
+              </Text>
+            </TouchableOpacity>
+          </View> 
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView:{
     flex:1,
     backgroundColor: '#0f0f0f',
+  },
+  container: {
     paddingTop: 80,
     paddingHorizontal: 24,
+    paddingBottom: 60, //breathing room at the bottom
   },
   title:{
     fontSize: 28,
@@ -177,7 +208,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#2a2a2a"
+    borderColor: '#2a2a2a',
   },
   calculateButton:{
     backgroundColor: '#3b82f6',
@@ -213,4 +244,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
   },
+  gaugeToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#0f0f0f',
+    borderRadius: 10,
+    padding: 3,
+    marginTop: 16,
+  },
+  gaugeToggleButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  gaugeToggleActive: {
+    backgroundColor: '#2a2a2a',
+  },
+  gaugeToggleText: {
+    color: '#555',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  gaugeToggleTextActive: {
+    color: '#ffffff'
+  }
 });
