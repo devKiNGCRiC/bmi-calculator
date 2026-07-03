@@ -12,7 +12,7 @@ import {
 import BarGauge from "../../components/BarGauge";
 import CurveGauge from "../../components/CurveGauge";
 import HealthTips from "../../components/HealthTips";
-import { colors, radius, spacing, getBmiInfo } from '../../constants/theme';
+import { getBmiInfo } from '../../constants/theme';
 
 type BMIResult = {
   value: number;
@@ -146,20 +146,6 @@ export default function HomeScreen() {
     };
 
     saveToHistory(entry);
-  };
-
-  const getCategory = (bmi: number) => {
-    if (bmi < 18.5) return "Underweight";
-    if (bmi < 25) return "Normal";
-    if (bmi < 30) return "Overweight";
-    return "Obese";
-  };
-
-  const getColor = (bmi: number) => {
-    if (bmi < 18.5) return "#3b82f6"; //Blue
-    if (bmi < 25) return "#22c55e"; //Green
-    if (bmi < 30) return "#f59e0b"; //Orange
-    return "#ef4444"; //Red
   };
 
   const getCategorySummary = (category: string) => {
