@@ -1,4 +1,5 @@
 import { View, Text,  StyleSheet } from 'react-native'
+import { colors } from '../constants/theme';
 
 type BarGaugeProps ={ 
     bmi: number;
@@ -19,10 +20,10 @@ export default function BarGauge({ bmi }: BarGaugeProps){
         <View style={styles.wrapper}>
             {/* The colored segmented bar */}
             <View style={styles.barContainer}>
-                <View style={[styles.segment, {backgroundColor: '#3b82f6', flex: 3.5}]} />
-                <View style={[styles.segment, {backgroundColor: '#22c55e', flex: 6.5}]} />
-                <View style={[styles.segment, {backgroundColor: '#f59e0b', flex: 5}]} />
-                <View style={[styles.segment, {backgroundColor: '#ef4444', flex: 10}]} />
+                <View style={[styles.segment, { backgroundColor: colors.underweight, flex: 3.5 }]} />
+                <View style={[styles.segment, { backgroundColor: colors.normal, flex: 6.5 }]} />
+                <View style={[styles.segment, { backgroundColor: colors.overweight, flex: 5 }]} />
+                <View style={[styles.segment, { backgroundColor: colors.obese, flex: 10 }]} />
 
                 {/* The Marker showing current BMI position */}
                 <View style={[styles.marker ,{ left: `${markerPercent}%`}]} />

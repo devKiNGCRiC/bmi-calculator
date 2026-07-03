@@ -1,50 +1,111 @@
-# Welcome to your Expo app 👋
+# 📊 BMI Calculator
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A premium, cross-platform BMI Calculator built with React Native and Expo. Calculate your Body Mass Index with support for both Metric and Imperial units, visualize your result with interactive gauge charts, track your history over time, and get personalized health tips — all in a clean, dark-themed UI.
 
-## Get started
+---
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+- **Accurate BMI Calculation** — supports both Metric (kg/cm) and Imperial (lbs/in) units
+- **Dual Gauge Visualization** — toggle between a curved arc gauge (SVG + trigonometry) and a horizontal bar gauge
+- **BMI History Tracker** — every calculation is saved locally on-device using AsyncStorage, with the ability to clear history
+- **Personalized Health Tips** — expandable, category-specific tips (Underweight / Normal / Overweight / Obese)
+- **Smooth Animations** — result card fades and slides in using React Native's Animated API
+- **Polished Dark UI** — custom color system, glow effects, focus states, and micro-interactions throughout
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ Tech Stack
 
-In the output, you'll find options to open the app in a
+| Layer | Technology |
+|---|---|
+| Framework | React Native (Expo) |
+| Language | TypeScript |
+| Navigation | Expo Router |
+| Charts | react-native-svg (custom-built gauges) |
+| Storage | @react-native-async-storage/async-storage |
+| Animations | React Native Animated API |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📱 Screenshots
 
-## Get a fresh project
+> _Add a few screenshots here once you have them — drag images into this section on GitHub, or place them in a `/screenshots` folder and reference them like:_
+>
+> ```md
+> <img src="./screenshots/home.png" width="250" />
+> <img src="./screenshots/result.png" width="250" />
+> <img src="./screenshots/history.png" width="250" />
+> ```
 
-When you're ready, run:
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) installed
+- [Expo Go](https://expo.dev/go) app installed on your phone (iOS/Android)
+
+### Installation
 
 ```bash
-npm run reset-project
+# Clone the repository
+git clone https://github.com/YOUR-USERNAME/bmi-calculator.git
+cd bmi-calculator
+
+# Install dependencies
+npm install
+
+# Start the development server
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Scan the QR code shown in your terminal using the **Expo Go** app to run it on your phone.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📂 Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+BMICalculator/
+├── app/
+│   ├── _layout.tsx          # Root layout, status bar config
+│   └── (tabs)/
+│       └── index.tsx        # Main screen — inputs, calculation, results
+├── components/
+│   ├── BarGauge.tsx         # Horizontal bar gauge visualization
+│   ├── CurveGauge.tsx       # SVG arc gauge with needle
+│   └── HealthTips.tsx       # Expandable health tips card
+├── constants/
+│   └── healthTips.ts        # Health tips data by BMI category
+├── assets/                  # Icons, splash screen images
+├── app.json                 # Expo app configuration
+└── package.json
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🧮 How BMI Is Calculated
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Metric:** `BMI = weight(kg) / height(m)²`
+
+**Imperial:** `BMI = (weight(lbs) / height(in)²) × 703`
+
+| BMI Range | Category |
+|---|---|
+| Below 18.5 | Underweight |
+| 18.5 – 24.9 | Normal |
+| 25 – 29.9 | Overweight |
+| 30 and above | Obese |
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgements
+
+Built as a learning project to explore React Native, Expo, TypeScript, and mobile app development from the ground up.

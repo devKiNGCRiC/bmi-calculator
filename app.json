@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "BMICalculator",
-    "slug": "BMICalculator",
+    "name": "BMI Calculator",
+    "slug": "bmi-Calculator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -33,9 +33,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#0b1220",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#0b1220"
           }
         }
       ]

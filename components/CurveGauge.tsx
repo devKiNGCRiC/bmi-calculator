@@ -1,5 +1,6 @@
 import { View , Text, StyleSheet } from 'react-native';
 import Svg , { Path, Circle , Line } from 'react-native-svg';
+import { colors } from '../constants/theme';
 
 type CurveGaugeProps = {
     bmi: number;
@@ -42,10 +43,10 @@ export default function CurveGauge({ bmi }: CurveGaugeProps){
 
     //Define our 4 BMI segments and converts their boundaries to angles
     const segments = [
-        {from: 15, to: 18.5, color: '#3b82f6'},
-        {from: 18.5, to: 25, color: '#22c55e'},
-        {from: 25, to: 30, color: '#f59e0b'},
-        {from: 30, to: 40, color: '#ef4444'},
+        { from: 15, to: 18.5, color: colors.underweight },
+        { from: 18.5, to: 25, color: colors.normal },
+        { from: 25, to: 30, color: colors.overweight },
+        { from: 30, to: 40, color: colors.obese },
     ];
 
     // Calculate needle angle based on actual BMI
