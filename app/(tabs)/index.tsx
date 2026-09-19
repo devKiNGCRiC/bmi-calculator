@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Animated,
   ScrollView,
   StyleSheet,
@@ -9,10 +10,25 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BarGauge from "../../components/BarGauge";
 import CurveGauge from "../../components/CurveGauge";
 import HealthTips from "../../components/HealthTips";
 import { getBmiInfo } from '../../constants/theme';
+
+const STORAGE_KEY = "bmi_history";
+const MAX_HISTORY = 50;
+
+// Realistic adult input ranges. Anything outside is almost certainly a typo
+// and would otherwise produce (and save) a meaningless BMI.
+const LIMITS = {
+  metric: { height: [50, 260], weight: [10, 500] },
+  imperial: { height: [20, 103], weight: [22, 1100] },
+} as const;
+
+// Accept both "65.5" and "65,5" (many Android/iOS locales type a comma).
+// Number() rejects junk like "6.5.5" or "65abc", unlike parseFloat.
+const parseNumber = (text: string) => Number(text.trim().replace(",", "."));
 
 type BMIResult = {
   value: number;
@@ -30,7 +46,8 @@ type HistoryEntry = {
 };
 
 export default function HomeScreen() {
-  const [unit, setUnit] = useState("metric");
+  const insets = useSafeAreaInsets();
+  const [unit, setUnit] = useState<"metric" | "imperial">("metric");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [bmiResult, setBmiResult] = useState<BMIResult | null>(null); // null = no result yet
@@ -41,7 +58,6 @@ export default function HomeScreen() {
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(30))[0];
 
-  const STORAGE_KEY = "bmi_history";
   const canCalculate = height.trim().length > 0 && weight.trim().length > 0;
 
   //Load history from device when app opens
@@ -63,7 +79,7 @@ export default function HomeScreen() {
 
   const saveToHistory = async (entry: HistoryEntry) => {
     try {
-      const updated = [entry, ...history]; //new entry goes to the top
+      const updated = [entry, ...history].slice(0, MAX_HISTORY); //new entry goes to the top, oldest dropped past the cap
       setHistory(updated);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (error) {
@@ -80,14 +96,40 @@ export default function HomeScreen() {
     }
   };
 
-  const calculateBMI = () => {
-    //Convert input strings to numbers
-    const h = parseFloat(height);
-    const w = parseFloat(weight);
+  const confirmClearHistory = () => {
+    Alert.alert(
+      "Clear history?",
+      "This will permanently delete all saved BMI entries.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Clear All", style: "destructive", onPress: clearHistory },
+      ],
+    );
+  };
 
-    //Basic validation
-    if (!h || !w || h <= 0 || w <= 0) {
-      alert("Please enter valid height and weight");
+  const calculateBMI = () => {
+    //Convert input strings to numbers (accepts comma or dot decimals)
+    const h = parseNumber(height);
+    const w = parseNumber(weight);
+
+    //Validation: must be a real number within a realistic range
+    const [minH, maxH] = LIMITS[unit].height;
+    const [minW, maxW] = LIMITS[unit].weight;
+    const heightUnit = unit === "metric" ? "cm" : "in";
+    const weightUnit = unit === "metric" ? "kg" : "lbs";
+
+    if (!Number.isFinite(h) || h < minH || h > maxH) {
+      Alert.alert(
+        "Check your height",
+        `Please enter a height between ${minH} and ${maxH} ${heightUnit}.`,
+      );
+      return;
+    }
+    if (!Number.isFinite(w) || w < minW || w > maxW) {
+      Alert.alert(
+        "Check your weight",
+        `Please enter a weight between ${minW} and ${maxW} ${weightUnit}.`,
+      );
       return;
     }
 
@@ -136,7 +178,7 @@ export default function HomeScreen() {
       category: result.category,
       color: result.color,
       unit: unit,
-      date: new Date().toLocaleDateString("en-IN", {
+      date: new Date().toLocaleDateString(undefined, {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -166,7 +208,11 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.scrollView}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        // Android 16 forces edge-to-edge, so keep content clear of the system bars
+        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 40 },
+      ]}
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.backgroundGlowTop} />
@@ -216,6 +262,9 @@ export default function HomeScreen() {
             ]}
             onPress={() => setUnit("metric")}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityState={{ selected: unit === "metric" }}
+            accessibilityLabel="Metric units, kilograms and centimeters"
           >
             <Text
               style={[
@@ -241,6 +290,9 @@ export default function HomeScreen() {
             ]}
             onPress={() => setUnit("imperial")}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityState={{ selected: unit === "imperial" }}
+            accessibilityLabel="Imperial units, pounds and inches"
           >
             <Text
               style={[
@@ -272,7 +324,8 @@ export default function HomeScreen() {
             style={[styles.input, heightFocused && styles.inputFocused]}
             placeholder={unit === "metric" ? "e.g. 170" : "e.g. 67"}
             placeholderTextColor="#7a828a"
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
+            accessibilityLabel={`Height in ${unit === "metric" ? "centimeters" : "inches"}`}
             value={height}
             onChangeText={setHeight}
             onFocus={() => setHeightFocused(true)}
@@ -291,7 +344,8 @@ export default function HomeScreen() {
             style={[styles.input, weightFocused && styles.inputFocused]}
             placeholder={unit === "metric" ? "e.g. 65" : "e.g. 142"}
             placeholderTextColor="#7a828a"
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
+            accessibilityLabel={`Weight in ${unit === "metric" ? "kilograms" : "pounds"}`}
             value={weight}
             onChangeText={setWeight}
             onFocus={() => setWeightFocused(true)}
@@ -307,6 +361,8 @@ export default function HomeScreen() {
           onPress={calculateBMI}
           disabled={!canCalculate}
           activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel="Calculate BMI"
         >
           <Text style={styles.calculateButtonText}>Calculate BMI</Text>
         </TouchableOpacity>
@@ -351,6 +407,9 @@ export default function HomeScreen() {
                 ]}
                 onPress={() => setGaugeType("curve")}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityState={{ selected: gaugeType === "curve" }}
+                accessibilityLabel="Show arc gauge"
               >
                 <Text
                   style={[
@@ -369,6 +428,9 @@ export default function HomeScreen() {
                 ]}
                 onPress={() => setGaugeType("bar")}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityState={{ selected: gaugeType === "bar" }}
+                accessibilityLabel="Show bar gauge"
               >
                 <Text
                   style={[
@@ -398,7 +460,11 @@ export default function HomeScreen() {
           {/* Header row */}
           <View style={styles.historyHeader}>
             <Text style={styles.historyTitle}>History</Text>
-            <TouchableOpacity onPress={clearHistory}>
+            <TouchableOpacity
+              onPress={confirmClearHistory}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all history"
+            >
               <Text style={styles.clearButton}>Clear All</Text>
             </TouchableOpacity>
           </View>
@@ -569,7 +635,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   toggleCaption: {
-    color: "#607086",
+    color: "#8592a6",
     fontSize: 12,
     marginTop: 4,
     fontWeight: "600",

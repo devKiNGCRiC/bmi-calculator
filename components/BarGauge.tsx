@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     labelText:{
-        color: '#666',
+        color: colors.textSecondary,
         fontSize: 12,
     },
 });
