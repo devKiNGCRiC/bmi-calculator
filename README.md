@@ -7,6 +7,7 @@ A premium, cross-platform BMI Calculator built with React Native and Expo. Calcu
 ## ✨ Features
 
 - **Accurate BMI Calculation** — supports both Metric (kg/cm) and Imperial (lbs/in) units
+- **Input Validation** — rejects out-of-range values and accepts both `65.5` and `65,5` decimal formats
 - **Dual Gauge Visualization** — toggle between a curved arc gauge (SVG + trigonometry) and a horizontal bar gauge
 - **BMI History Tracker** — every calculation is saved locally on-device using AsyncStorage, with the ability to clear history
 - **Personalized Health Tips** — expandable, category-specific tips (Underweight / Normal / Overweight / Obese)
@@ -25,18 +26,26 @@ A premium, cross-platform BMI Calculator built with React Native and Expo. Calcu
 | Charts | react-native-svg (custom-built gauges) |
 | Storage | @react-native-async-storage/async-storage |
 | Animations | React Native Animated API |
+| Icons | @expo/vector-icons |
 
 ---
 
 ## 📱 Screenshots
 
-> _Add a few screenshots here once you have them — drag images into this section on GitHub, or place them in a `/screenshots` folder and reference them like:_
->
-> ```md
-> <img src="./screenshots/home.png" width="250" />
-> <img src="./screenshots/result.png" width="250" />
-> <img src="./screenshots/history.png" width="250" />
-> ```
+<table>
+  <tr>
+    <td align="center"><img src="./screenshots/home.png" width="220" alt="Home screen with unit toggle and height/weight inputs" /></td>
+    <td align="center"><img src="./screenshots/result-arc.png" width="220" alt="BMI result of 22.5 (Normal) shown on the arc gauge" /></td>
+    <td align="center"><img src="./screenshots/result-bar-tips.png" width="220" alt="BMI result of 26.8 (Overweight) on the bar gauge with health tips expanded" /></td>
+    <td align="center"><img src="./screenshots/history.png" width="220" alt="Saved BMI history list colour-coded by category" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Home</b></td>
+    <td align="center"><b>Arc gauge</b></td>
+    <td align="center"><b>Bar gauge + tips</b></td>
+    <td align="center"><b>History</b></td>
+  </tr>
+</table>
 
 ---
 
@@ -50,7 +59,7 @@ A premium, cross-platform BMI Calculator built with React Native and Expo. Calcu
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR-USERNAME/bmi-calculator.git
+git clone https://github.com/devKiNGCRiC/bmi-calculator.git
 cd bmi-calculator
 
 # Install dependencies
@@ -60,7 +69,7 @@ npm install
 npx expo start
 ```
 
-Scan the QR code shown in your terminal using the **Expo Go** app to run it on your phone.
+Scan the QR code shown in your terminal using the **Expo Go** app to run it on your phone, or press `w` to open it in a web browser.
 
 ---
 
@@ -71,13 +80,16 @@ BMICalculator/
 ├── app/
 │   ├── _layout.tsx          # Root layout, status bar config
 │   └── (tabs)/
+│       ├── _layout.tsx      # Stack layout (header hidden)
 │       └── index.tsx        # Main screen — inputs, calculation, results
 ├── components/
 │   ├── BarGauge.tsx         # Horizontal bar gauge visualization
 │   ├── CurveGauge.tsx       # SVG arc gauge with needle
 │   └── HealthTips.tsx       # Expandable health tips card
 ├── constants/
-│   └── healthTips.ts        # Health tips data by BMI category
+│   ├── healthTips.ts        # Health tips data by BMI category
+│   └── theme.ts             # Colors, spacing, radius + BMI category mapping
+├── screenshots/             # README screenshots
 ├── assets/                  # Icons, splash screen images
 ├── app.json                 # Expo app configuration
 └── package.json
